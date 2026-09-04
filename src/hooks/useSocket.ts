@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { io } from "socket.io-client";
+import { useEffect, useRef } from "react";
+import { io, Socket } from "socket.io-client";
 import { ObjectItem } from "@/types/object";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -11,23 +11,32 @@ export function useSocket(
   onObjectDeleted?: (deletedId: string) => void,
   onObjectLiked?: (data: { id: string; likesCount: number }) => void
 ) {
+  // Conserver les références des callbacks pour éviter de recréer le socket
+  const callbacksRef = useRef({ onObjectCreated, onObjectDeleted, onObjectLiked });
+
   useEffect(() => {
-    const socket = io(SOCKET_URL);
+    callbacksRef.current = { onObjectCreated, onObjectDeleted, onObjectLiked };
+  }, [onObjectCreated, onObjectDeleted, onObjectLiked]);
+
+  useEffect(() => {
+    const socket: Socket = io(SOCKET_URL, {
+      transports: ["websocket", "polling"],
+    });
 
     socket.on("objectCreated", (newObject: ObjectItem) => {
-      if (onObjectCreated) onObjectCreated(newObject);
+      callbacksRef.current.onObjectCreated?.(newObject);
     });
 
     socket.on("objectDeleted", (deletedId: string) => {
-      if (onObjectDeleted) onObjectDeleted(deletedId);
+      callbacksRef.current.onObjectDeleted?.(deletedId);
     });
 
     socket.on("objectLiked", (data: { id: string; likesCount: number }) => {
-      if (onObjectLiked) onObjectLiked(data);
+      callbacksRef.current.onObjectLiked?.(data);
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [onObjectCreated, onObjectDeleted, onObjectLiked]);
+  }, []);
 }
