@@ -15,7 +15,8 @@ import {
   Trash2, 
   Share2, 
   Check,
-  ChevronRight
+  ChevronRight,
+  CheckCircle2
 } from "lucide-react";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/Footer";
@@ -28,12 +29,20 @@ export default function ObjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [addedLikes, setAddedLikes] = useState(0);
+  const [hasLiked, setHasLiked] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     fetchObjectById(id)
-      .then(setItem)
+      .then((data) => {
+        setItem(data);
+        // Vérifier si l'utilisateur a déjà liké cet objet
+        const likedItems = JSON.parse(localStorage.getItem("heyama_liked_items") || "[]");
+        if (likedItems.includes(data._id)) {
+          setHasLiked(true);
+        }
+      })
       .catch((err: unknown) => {
         console.error("Objet non trouvé:", err);
         router.push("/404");
@@ -51,12 +60,26 @@ export default function ObjectDetailPage() {
   const displayLikes = (item.likesCount || 0) + addedLikes;
 
   const handleLike = async () => {
+    if (hasLiked) return; // Empêcher le double-clic
+
+    // 1. Mise à jour visuelle immédiate
+    setHasLiked(true);
     setAddedLikes((prev) => prev + 1);
+
+    // 2. Sauvegarde dans le localStorage
+    const likedItems = JSON.parse(localStorage.getItem("heyama_liked_items") || "[]");
+    localStorage.setItem("heyama_liked_items", JSON.stringify([...likedItems, item._id]));
+
+    // 3. Appel de l'API backend
     try {
       await likeObject(item._id);
     } catch (error) {
-      console.error("Erreur de like:", error);
+      console.error("Erreur lors de l'enregistrement du like:", error);
+      // Annuler en cas d'erreur réseau
+      setHasLiked(false);
       setAddedLikes((prev) => Math.max(0, prev - 1));
+      const updatedLikedItems = likedItems.filter((likedId: string) => likedId !== item._id);
+      localStorage.setItem("heyama_liked_items", JSON.stringify(updatedLikedItems));
     }
   };
 
@@ -159,13 +182,28 @@ export default function ObjectDetailPage() {
                 </h1>
               </div>
 
+              {/* Bouton J'aime avec blocage localStorage */}
               <button
                 type="button"
                 onClick={handleLike}
-                className="w-full py-3.5 rounded-2xl bg-purple-900 hover:bg-purple-950 text-white font-black text-sm shadow-md active:scale-[0.98] border-2 border-purple-800 transition-all cursor-pointer flex items-center justify-center gap-2.5 select-none"
+                disabled={hasLiked}
+                className={`w-full py-3.5 rounded-2xl font-black text-sm shadow-md transition-all flex items-center justify-center gap-2.5 select-none ${
+                  hasLiked
+                    ? "bg-rose-50 text-rose-700 border-2 border-rose-200 cursor-not-allowed opacity-90"
+                    : "bg-purple-900 hover:bg-purple-950 text-white border-2 border-purple-800 active:scale-[0.98] cursor-pointer"
+                }`}
               >
-                <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
-                <span>{displayLikes} J'aime</span>
+                {hasLiked ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-rose-600" />
+                    <span>Déjà aimé ({displayLikes})</span>
+                  </>
+                ) : (
+                  <>
+                    <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
+                    <span>{displayLikes} J'aime</span>
+                  </>
+                )}
               </button>
 
               <hr className="border-purple-100" />
@@ -184,10 +222,10 @@ export default function ObjectDetailPage() {
         </main>
       </div>
 
-      {/* Footer collé en bas */}
+      {/* Footer */}
       <Footer />
 
-      {/* Pop-up de confirmation de suppression sur-mesure */}
+      {/* Confirmation de suppression */}
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
