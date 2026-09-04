@@ -31,7 +31,7 @@ export function Navbar({ onOpenCreateModal }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b-2 border-purple-200/90 shadow-xs">
-      <div className="max-w-5xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between gap-2">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between gap-2">
         
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
