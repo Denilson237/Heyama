@@ -1,6 +1,9 @@
+
+
 "use client";
 
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { Plus, Info, Sparkles } from "lucide-react";
 
 interface NavbarProps {
@@ -8,25 +11,32 @@ interface NavbarProps {
 }
 
 export function Navbar({ onOpenCreateModal }: NavbarProps) {
-  const scrollToAbout = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // Si on est sur la page d'accueil, scroll fluide vers la section #about
-    if (window.location.pathname === "/") {
-      e.preventDefault();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+
+    if (pathname === "/") {
+      // Si on est déjà sur la page d'accueil -> Scroll fluide vers la section
       const aboutSection = document.getElementById("about");
       if (aboutSection) {
         aboutSection.scrollIntoView({ behavior: "smooth" });
       }
+    } else {
+      // Si on est sur une autre page (ex: détail) -> Redirection vers /#about
+      router.push("/#about");
     }
   };
 
   return (
     <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b-2 border-purple-200/90 shadow-xs">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between gap-2">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 h-16 flex items-center justify-between gap-2">
         
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center text-white shadow-md border-2 border-purple-300 group-hover:scale-105 transition-transform">
-            <Sparkles className="w-5 h-5 fill-white/20" />
+          <div className="w-9 h-9 rounded-xl bg-purple-600 text-white font-black flex items-center justify-center text-lg shadow-sm group-hover:bg-purple-700 transition-colors">
+            H
           </div>
           <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             Heyama<span className="text-purple-600">.</span>
@@ -38,8 +48,8 @@ export function Navbar({ onOpenCreateModal }: NavbarProps) {
           
           {/* Bouton À propos */}
           <a
-            href="#about"
-            onClick={scrollToAbout}
+            href="/#about"
+            onClick={handleAboutClick}
             className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs border-2 border-purple-200/90 transition-colors cursor-pointer"
             title="À propos"
           >
