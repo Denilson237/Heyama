@@ -8,9 +8,10 @@ import { Image as ImageIcon, UploadCloud, Loader2, Plus, X, AlertCircle } from "
 interface CreateObjectModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void; // <-- Callback déclenché après création réussie
 }
 
-export function CreateObjectModal({ isOpen, onClose }: CreateObjectModalProps) {
+export function CreateObjectModal({ isOpen, onClose, onSuccess }: CreateObjectModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -43,15 +44,22 @@ export function CreateObjectModal({ isOpen, onClose }: CreateObjectModalProps) {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
-      formData.append("file", file); // Clef 'file' requise par le backend GitHub
+      formData.append("file", file);
 
       await createObject(formData);
 
+      // Réinitialisation du formulaire
       setTitle("");
       setDescription("");
       setFile(null);
       setPreviewUrl(null);
+      
       onClose();
+
+      // Appeler le rafraîchissement pour afficher la nouvelle image immédiatement
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
       console.error("Erreur de création:", error);
       setErrorMessage(error.message || "Erreur lors de la création de l'objet");

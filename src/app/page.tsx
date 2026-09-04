@@ -17,6 +17,12 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const refreshObjects = () => {
+    fetchObjects()
+      .then(setItems)
+      .catch(console.error);
+  };
+
   useEffect(() => {
     fetchObjects()
       .then(setItems)
@@ -89,7 +95,11 @@ export default function HomePage() {
       <Footer />
 
       {/* Modal de création */}
-      <CreateObjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <CreateObjectModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={refreshObjects}
+      />
     </div>
   );
 }
