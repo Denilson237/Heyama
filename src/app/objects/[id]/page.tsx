@@ -62,7 +62,7 @@ export default function ObjectDetailPage() {
   const handleLike = async () => {
     if (hasLiked) return; // Empêcher le double-clic
 
-    // 1. Mise à jour visuelle immédiate
+    // 1. Mise à jour visuelle immédiate côté client
     setHasLiked(true);
     setAddedLikes((prev) => prev + 1);
 
@@ -70,12 +70,15 @@ export default function ObjectDetailPage() {
     const likedItems = JSON.parse(localStorage.getItem("heyama_liked_items") || "[]");
     localStorage.setItem("heyama_liked_items", JSON.stringify([...likedItems, item._id]));
 
-    // 3. Appel de l'API backend
+    // 3. Appel de l'API backend + Rafraîchissement Next.js
     try {
       await likeObject(item._id);
+      
+      // Invalide le cache Next.js pour que la page d'accueil prenne en compte le nouveau like
+      router.refresh();
     } catch (error) {
       console.error("Erreur lors de l'enregistrement du like:", error);
-      // Annuler en cas d'erreur réseau
+      // Annuler la mise à jour visuelle en cas d'erreur
       setHasLiked(false);
       setAddedLikes((prev) => Math.max(0, prev - 1));
       const updatedLikedItems = likedItems.filter((likedId: string) => likedId !== item._id);
