@@ -195,8 +195,8 @@ export default function ObjectDetailPage() {
               >
                 {hasLiked ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 text-rose-600" />
-                    <span>Déjà aimé ({displayLikes})</span>
+                    <CheckCircle2 className="w-4 h-4 text-rose-500" />
+                    <span>Aimé ({displayLikes})</span>
                   </>
                 ) : (
                   <>
