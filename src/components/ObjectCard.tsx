@@ -1,132 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { ObjectItem } from "@/types/object";
-import { deleteObject, likeObject } from "@/lib/api";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash2, Heart, Calendar, Sparkles } from "lucide-react";
+import { Heart, Calendar, ArrowUpRight } from "lucide-react";
 
 interface ObjectCardProps {
   item: ObjectItem;
 }
 
 export function ObjectCard({ item }: ObjectCardProps) {
-  const [deleting, setDeleting] = useState(false);
-  const [liking, setLiking] = useState(false);
-
-  const handleDelete = async () => {
-    try {
-      setDeleting(true);
-      await deleteObject(item._id);
-    } catch (error) {
-      console.error("Erreur de suppression:", error);
-      setDeleting(false);
-    }
-  };
-
-  const handleLike = async () => {
-    if (liking) return;
-    try {
-      setLiking(true);
-      await likeObject(item._id);
-    } catch (error) {
-      console.error("Erreur de like:", error);
-    } finally {
-      setLiking(false);
-    }
-  };
-
   return (
-    <div className="group relative bg-white rounded-3xl overflow-hidden border border-purple-100/80 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between">
-      <div className="relative h-72 w-full overflow-hidden bg-purple-50">
+    <Link
+      href={`/objects/${item._id}`}
+      className="bg-white/95 rounded-3xl p-3.5 border-2 border-purple-200/90 hover:border-purple-400/90 shadow-md shadow-purple-950/5 hover:shadow-xl hover:shadow-purple-900/10 transition-all duration-300 flex flex-col justify-between overflow-hidden relative group"
+    >
+      {/* Zone Image avec bordure subtile */}
+      <div className="relative h-64 w-full rounded-2xl overflow-hidden bg-slate-900/5 border-2 border-purple-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.imageUrl}
           alt={item.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-90" />
-        
-        <div className="absolute top-3 left-3 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold text-purple-950 flex items-center gap-1 shadow-sm">
-          <Calendar className="w-3 h-3 text-purple-600" />
-          {new Date(item.createdAt).toLocaleDateString("fr-FR", { month: "short", day: "numeric" })}
+
+        {/* Badge Date */}
+        <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-900/75 backdrop-blur-md text-purple-100 text-[10px] font-bold flex items-center gap-1.5 border border-purple-300/30 shadow-xs">
+          <Calendar className="w-3 h-3 text-purple-300" />
+          <span>
+            {new Date(item.createdAt).toLocaleDateString("fr-FR", {
+              day: "numeric",
+              month: "short",
+            })}
+          </span>
         </div>
 
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-900/40 hover:bg-rose-600 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
-          title="Supprimer la publication"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-
-        <div className="absolute bottom-3 left-4 right-4 text-white flex items-center justify-between gap-2">
-          <h3 className="text-lg font-bold truncate leading-snug drop-shadow-sm">
+        {/* Overlay Title & Likes */}
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent p-4 pt-10 flex items-end justify-between gap-2">
+          <h3 className="font-black text-white text-base truncate drop-shadow-sm tracking-tight">
             {item.title}
           </h3>
-          <button
-            onClick={handleLike}
-            disabled={liking}
-            className="px-3 py-1 rounded-full bg-rose-500/90 text-white backdrop-blur-md hover:bg-rose-600 flex items-center gap-1.5 font-bold text-xs shadow-md transition-all active:scale-110 cursor-pointer"
-          >
-            <Heart className="w-3.5 h-3.5 fill-white" />
+          <div className="px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold flex items-center gap-1 shadow-xs">
+            <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
             <span>{item.likesCount || 0}</span>
-          </button>
+          </div>
         </div>
       </div>
 
-      <div className="p-4 flex-1 flex flex-col justify-between">
-        <p className="text-slate-600 text-sm line-clamp-2 mb-4 leading-relaxed font-normal">
+      {/* Description & CTA */}
+      <div className="p-1 pt-3.5 space-y-3 flex-1 flex flex-col justify-between">
+        <p className="text-slate-600 text-xs line-clamp-2 leading-relaxed font-semibold">
           {item.description}
         </p>
 
-        <Dialog>
-          <DialogTrigger className="w-full py-2.5 px-4 rounded-2xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer">
-            <Sparkles className="w-4 h-4 text-purple-600" />
-            <span>Découvrir cette pépite</span>
-          </DialogTrigger>
-
-          <DialogContent className="sm:max-w-[480px] rounded-3xl p-0 overflow-hidden border-0 shadow-2xl">
-            <div className="relative h-80 w-full bg-slate-950">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-              <div className="absolute bottom-4 left-6 right-6 text-white">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-black text-white flex items-center justify-between">
-                    <span>{item.title}</span>
-                    <div className="flex items-center gap-1 text-rose-400">
-                      <Heart className="w-6 h-6 fill-rose-400" />
-                      <span className="text-lg font-bold">{item.likesCount || 0}</span>
-                    </div>
-                  </DialogTitle>
-                </DialogHeader>
-              </div>
-            </div>
-
-            <div className="p-6 bg-white space-y-4">
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-purple-900/50 mb-1">
-                  Histoire & Origine
-                </h4>
-                <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-line">
-                  {item.description}
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-purple-100 flex items-center justify-between text-xs text-slate-400">
-                <span>Publié le {new Date(item.createdAt).toLocaleString("fr-FR")}</span>
-                <span className="font-bold text-purple-600">Heyama Match Verified</span>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <div className="w-full py-2.5 px-4 rounded-xl bg-purple-50/80 group-hover:bg-purple-700 text-purple-800 group-hover:text-white font-black text-xs flex items-center justify-center gap-1.5 border-2 border-purple-200/80 group-hover:border-purple-600 transition-all shadow-xs">
+          <span>Découvrir l'image</span>
+          <ArrowUpRight className="w-4 h-4" />
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }

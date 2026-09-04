@@ -16,12 +16,26 @@ export async function likeObject(id: string): Promise<ObjectItem> {
   return res.json();
 }
 
+export async function fetchObjectById(id: string): Promise<ObjectItem> {
+  const res = await fetch(`${API_URL}/objects/${id}`);
+  if (!res.ok) {
+    throw new Error("Impossible de récupérer l'objet");
+  }
+  return res.json();
+}
+
 export async function createObject(formData: FormData): Promise<ObjectItem> {
   const res = await fetch(`${API_URL}/objects`, {
     method: "POST",
-    body: formData,
+    body: formData, // N'ajoutez pas 'Content-Type', 'fetch' s'en charge automatiquement pour le multipart/form-data
   });
-  if (!res.ok) throw new Error("Failed to create object");
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    const detail = errorBody?.message || errorBody?.error || `Code HTTP ${res.status}`;
+    throw new Error(`Échec de la création: ${detail}`);
+  }
+
   return res.json();
 }
 

@@ -3,9 +3,9 @@ import { Sparkles, Compass, Home } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-purple-50/50 flex items-center justify-center p-6">
-      <div className="max-w-md w-full text-center bg-white rounded-3xl border border-purple-100 p-8 shadow-2xl shadow-purple-200/50 relative overflow-hidden">
-        {/* Halo décoratif */}
+    <main className="min-h-screen bg-[hsl(var(--background))] flex items-center justify-center p-6">
+      <div className="max-w-md w-full text-center bg-white rounded-3xl border border-purple-100 p-8 shadow-xl shadow-purple-200/50 relative overflow-hidden">
+        {/* Glow décoratif */}
         <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-300/30 rounded-full blur-2xl pointer-events-none" />
 
         <div className="w-20 h-20 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-purple-600 shadow-inner">
@@ -21,7 +21,7 @@ export default function NotFound() {
         </h1>
 
         <p className="text-sm text-slate-500 mb-8 leading-relaxed">
-          Peu importe où tu te trouves, cette page ou ressource semble ne plus exister.
+          Oups, la page ou le profil que tu cherches n&apos;existe plus ou a été déplacé.
         </p>
 
         <Link
